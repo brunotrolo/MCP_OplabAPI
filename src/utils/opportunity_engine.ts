@@ -371,10 +371,20 @@ export function normalizarOportunidadeParams(a: Record<string, unknown>): Oportu
       : [...WHITELIST_OPORTUNIDADES];
   return {
     capital: Math.max(0, num(a.capital, 0)),
-    meta_mensal: Math.max(0, num(a.meta_mensal, 4000)),
+    // meta_mensal alinhado a meta_mensal_min_brl do portfolio_params.yaml (era 4000,
+    // divergente; YAML diz 5000). Os 3 abaixo NÃO têm campo equivalente literal no
+    // YAML — margem_max_pct fica em 0.35 (decisão do operador: colchao_minimo_pct
+    // implicaria 0.85, mas não é um campo direto, não presumir); spread_width e
+    // iv_rank_periodo não têm nenhum parâmetro correspondente no YAML (unidades
+    // diferentes: eficiencia_minima_pct é uma razão %, iv_rank_minimo_pct é limiar,
+    // não janela em dias) — mantidos como estavam.
+    meta_mensal: Math.max(0, num(a.meta_mensal, 5000)),
     margem_max_pct: Math.min(1, Math.max(0.01, num(a.margem_max_pct, 0.35))),
     spread_width: Math.max(0.5, num(a.spread_width, 3.0)),
-    delta_min: num(a.delta_min, -0.25),
+    // delta_min alinhado a delta_entrada_max do YAML (-0.30, "maior |delta|" na
+    // convenção do projeto = mais negativo). Era -0.25, divergente.
+    delta_min: num(a.delta_min, -0.30),
+    // delta_max já batia com delta_entrada_min do YAML (-0.15, "menor |delta|") — sem mudança.
     delta_max: num(a.delta_max, -0.15),
     dte_min: Math.round(num(a.dte_min, 15)),
     dte_max: Math.round(num(a.dte_max, 30)),
